@@ -1,0 +1,98 @@
+body {
+  background-color: #eee;
+}
+h1, p {
+  font-family: Lato;
+}
+.buttonBar {
+  text-align: center;
+  margin: 1em;
+}
+#timeDisplay {
+  font-size: 4em;
+  text-align: center;
+  padding: 0.3em;
+}
+.paused {
+  color: red;
+}
+.progressBar {
+  border: 1px solid #ddd;
+  margin: 1em 0.5em 0 0.5em;
+  border-Radius: 0.3em;
+}
+.progressLabel {
+  font-weight: bold;
+  margin: 0 0.5em;
+}
+.progressLabel span {
+  display: inline-block;
+  width: 33%;
+  text-align: center;
+}
+.progressLabel span:first-of-type {
+ text-align: left;
+}
+.progressLabel span:last-of-type {
+ text-align: right;
+}
+.emptyBar {
+  width: 10%;
+  height: 2em;
+  background-color: red;
+  transition: width 2s linear 0s;
+}
+.fullBar {
+  width: 100%;
+  height: 2em;
+  background-color: teal;
+}
+.cycleBar {
+  height: 2em;
+  width: 0%;
+  transform-origin: left center;
+  -webkit-animation: 5000ms fillbar infinite linear;
+  -moz-animation: 5000ms fillbar infinite linear;
+  -ms-animation: 5000ms fillbar infinite linear;
+  -o-animation: 5000ms fillbar infinite linear;
+  animation: 5000ms fillbar infinite linear;
+  /*animation-duration: 4500ms, 500ms, 1000ms;
+  animation-delay: 0ms, 4500ms, 5000ms;
+  animation-iteration-count: infinite;
+  animation-name: fillbar, fullbar, emptybar;
+  animation-timing-function: linear;*/
+  border-radius: 0.3em;
+}
+@keyframes fullbar {
+  0% { width: 100%; background-color: red; }
+  100% { width: 100%; }
+}
+@keyframes fillbar {
+  0% { width: 0%; }
+  99% { width: 100%; }
+  100% { width: 100%; }  
+}
+@keyframes emptybar {
+  100% { width: 0%; }
+  0% { width: 100%; }
+}
+@-webkit-keyframes fillbar {
+  0% { width: 0%; }
+  99% { width: 100%; }
+  100% { width: 100%; }
+}
+@-moz-keyframes fillbar {
+  0% { width: 0%; }
+  99% { width: 100%; }
+  100% { width: 100%; }  
+}
+@-ms-keyframes fillbar {
+  0% { width: 0%; }
+  99% { width: 100%; }
+  100% { width: 100%; }  
+}
+@-o-keyframes fillbar {
+  0% { width: 0%; }
+  99% { width: 100%; }
+  100% { width: 100%; }
+}
