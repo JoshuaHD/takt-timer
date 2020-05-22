@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
 
-import { Button } from "semantic-ui-react";
+import { Button, Input, Dropdown } from "semantic-ui-react";
 
 import TimeDisplay from "./components/TimeDisplay";
 
-let colors = ["#8684a4", "#7f2ccb", "#80ced6", "#e899dc", "#8b1e3f", "#C2CAE8", "#db4c40", "#89bd9e", "#b96d40", "#fabc3c"];
+const colorsFull = ["#8684a4", "#7f2ccb", "#80ced6", "#e899dc", "#8b1e3f", "#C2CAE8", "#db4c40", "#89bd9e", "#b96d40", "#fabc3c"];
+let colors = [...colorsFull];
 const formatTime = time => {
   if (!time) return false;
 
@@ -45,7 +46,7 @@ const ButtonBar = props => {
 };
 
 const Bar = props => {
-  const { color, cycleTime, playState, reset, runtime } = props;
+  const { color, cycleTime, label, playState, reset, runtime } = props;
   playState = playState ? "paused" : "running";
   const rounds = Math.floor(runtime / cycleTime);
   const value = Math.round((runtime % cycleTime) / 1000);
@@ -61,8 +62,9 @@ const Bar = props => {
 
   return (
     <div>
+      <div className="progressName">{label}</div>
       <div className="progressBar">
-        <div className={"cycleBar"} style={css} />
+        <div className={"cycleBar"} style={css}></div>
       </div>
       <div className="progressLabel">
         <span>{rounds}</span>
@@ -74,6 +76,41 @@ const Bar = props => {
     </div>
   );
 };
+class AddTimerForm extends Component {
+  constructor (props) {
+    super();
+    console.log('props', props)
+
+    this.state = {
+      bg: props.color || colorsFull[1],
+      duration: props.cycle / 1000 || "",
+      key: props.k
+    }
+  }
+  handleClick = () => {
+    this.props.callback({color: this.state.bg, cycle: this.state.duration * 1000, k: this.state.key});
+  }
+  handleChange = (e, data) => {
+    this.setState({[data.name]: data.value});
+  }
+
+  render () {
+    const options = colorsFull;
+    const {bg, duration, key} = this.state;
+
+    return <div className="editBarForm">
+    <Input type='number' name='duration' placeholder='Seconds' value={duration} onChange={this.handleChange} action>
+      <input />
+      <Dropdown selection compact placeholder='' icon='' style={{backgroundColor: bg, width: '5em',}}>
+      <Dropdown.Menu>
+        {options.map(v => <Dropdown.Item key={v} style={{backgroundColor: v}} name='bg' value={v} text='&nbsp;' onClick={this.handleChange} />)}
+      </Dropdown.Menu>
+      </Dropdown>
+      <Button type='submit' disabled={(duration < 1)} onClick={this.handleClick}>{(key >= 0) ? "update" : "add"}</Button>
+    </Input>
+    </div>
+  }
+}
 export default class C extends Component {
   constructor() {
     super();
@@ -86,10 +123,11 @@ export default class C extends Component {
       counters: [
         { color: colors.pop(), cycle: 3000 },
         { color: colors.pop(), cycle: 6000 },
-        { color: colors.pop(), cycle: 12000 },
+        { color: colors.pop(), cycle: 12000, label: "Zwölf sekunden" },
         { color: colors.pop(), cycle: 18000 },
-        { color: colors.pop(), cycle: 36000 }
-      ]
+        { color: colors.pop(), cycle: 36000 },
+      ],
+      editMode: false,
     };
 
     clearInterval(window.interval);
@@ -200,6 +238,20 @@ export default class C extends Component {
       setTimeout(this.handleStart, 1000);
     }
   };
+  handleEditForm = (formdata) => {
+    let {counters} = this.state;
+    //console.log(this.state, counters, formdata)
+    if(formdata.k){
+      counters[formdata.k] = {...counters[formdata.k], ...formdata}
+      console.log('c', counters)
+      this.setState({counters, editId: null});
+    } else {
+      this.setState({counters: [...this.state.counters, formdata], editId: null});
+    }
+  }
+  toggleEditMode = () => {
+    this.setState({editMode: !this.state.editMode});
+  }
   componentDidUpdate = () => {
     //console.log(this.state, this.totalPauseLength(), this.totalRuntime(), this.totalNetRuntime());
   };
@@ -209,6 +261,7 @@ export default class C extends Component {
 
     return (
       <div>
+        <AddTimerForm callback={this.handleEditForm} /><Button content={"EditMode"} onClick={this.toggleEditMode} />
         <ButtonBar
           handleStart={this.handleStart}
           handleStop={this.handleStop}
@@ -217,15 +270,16 @@ export default class C extends Component {
           state={this.state}
         />
         <TimeDisplay time={netRuntime} className={(playState) ? 'paused' : ''} />
-        {this.state.counters.map(({ color, cycle }, k) => (
-          <Bar
+        {this.state.counters.map(({ color, cycle, label }, k) => (
+          (!this.state.editMode) ? <Bar
             key={k}
             color={color}
             cycleTime={cycle}
+            label={label}
             playState={this.state.playState}
             reset={!this.state.start && !this.state.end}
             runtime={netRuntime}
-          />
+          /> : <AddTimerForm callback={this.handleEditForm} color={color} cycle={cycle} k={k}  />
         ))}
         <div className='statistics'>
         {this.state.start && <div>Start: {formatTime(this.state.start)}</div>}
